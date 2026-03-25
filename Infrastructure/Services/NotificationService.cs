@@ -1,6 +1,6 @@
 using HotelReservation.Application.Interfaces;
 
-namespace HotelReservation.Application.Services;
+namespace HotelReservation.Infrastructure.Services;
 
 public class NotificationService : INotificationService
 {

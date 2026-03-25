@@ -1,9 +1,6 @@
-namespace HotelReservation.Domain.Models;
+using HotelReservation.Application.Services.Reservation;
 
-// SRP VIOLATION (Example 3): This class serves THREE actors:
-// - Receptionist: lifecycle (Cancel, Status management)
-// - Accountant: billing (CalculateTotal, GenerateInvoiceLine)
-// - Housekeeper: cleaning schedule (GetLinenChangeDays)
+namespace HotelReservation.Domain.Models;
 
 public class Reservation
 {
@@ -15,7 +12,11 @@ public class Reservation
     public int GuestCount { get; set; }
     public string RoomType { get; set; } = string.Empty;
     public string Status { get; set; } = "Confirmed"; // Confirmed, CheckedIn, CheckedOut, Cancelled
-    public string CancellationPolicy { get; set; } = "Flexible";
+    public ICancellationPolicy CancellationPolicy { get; set; }
     public string Email { get; set; } = string.Empty;
     public decimal TotalPrice { get; set; }
+    public decimal CalculateRefund(DateTime now)
+    {
+        return CancellationPolicy.CalculateRefund(this, now);
+    }
 }

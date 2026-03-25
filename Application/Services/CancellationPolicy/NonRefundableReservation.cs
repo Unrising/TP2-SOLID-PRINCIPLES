@@ -1,6 +1,6 @@
 using HotelReservation.Application.Interfaces;
 
-namespace HotelReservation.Application.Services;
+namespace HotelReservation.Application.Services.CancellationPolicy;
 
 // LSP VIOLATION: Cancel() throws instead of performing the expected behavior.
 // Code that calls ICancellable.Cancel() will crash when given a NonRefundableReservation.

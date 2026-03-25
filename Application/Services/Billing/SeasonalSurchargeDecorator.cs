@@ -1,11 +1,7 @@
 using HotelReservation.Application.Interfaces;
 
-namespace HotelReservation.Application.Services;
+namespace HotelReservation.Application.Services.Billing;
 
-using HotelReservation.Domain.Models;
-
-// OCP GOOD EXAMPLE (Decorator pattern): Adds seasonal pricing without modifying
-// the base calculator. New decorators can be stacked without touching existing code.
 public class SeasonalSurchargeDecorator : IPriceCalculator
 {
     private readonly IPriceCalculator _inner;
@@ -17,9 +13,10 @@ public class SeasonalSurchargeDecorator : IPriceCalculator
         _surchargeRate = surchargeRate;
     }
 
-    public decimal Calculate(Reservation reservation)
+    public decimal Calculate(Domain.Models.Reservation reservation)
     {
         var basePrice = _inner.Calculate(reservation);
         return basePrice * (1 + _surchargeRate);
     }
+
 }

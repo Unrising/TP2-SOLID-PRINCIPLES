@@ -4,15 +4,20 @@ using HotelReservation.Infrastructure.Repositories;
 using HotelReservation.Domain.Models;
 using HotelReservation.Infrastructure.Interfaces;
 using HotelReservation.Infrastructure;
-using HotelReservation.Application.Services;
 using HotelReservation.Infrastructure.Services;
+using HotelReservation.Application.Services.CancellationPolicy;
+using HotelReservation.Application.Services.Reservation;
+using HotelReservation.Application;
+using HotelReservation.Application.Services.Checkin;
+using HotelReservation.Application.Services.Billing;
+using HotelReservation.Application.Services.CleaningPolicy;
 
 Console.WriteLine("=== Le Mas des Oliviers - Hotel Management System ===");
 Console.WriteLine();
 
 ILogger logger = new FileLogger();
-IPriceCalculator priceCalculator = new Accountant();
-IReservationRepository reservationRepo = new InMemoryReservationRepository(priceCalculator);
+IReservationAccounting reservationAccounting = new Accountant();
+IReservationRepository reservationRepo = new InMemoryReservationRepository(reservationAccounting);
 IRoomRepository roomRepository = new InMemoryRoomRepository(reservationRepo);
 
 List<Room> _rooms = new()
@@ -72,7 +77,8 @@ Console.WriteLine("--- Scenario 3: Cancellation ---");
 ICancellable flexibleReservation = new FlexibleReservation();
 var cancellationService = new CancellationService(flexibleReservation);
 var aliceReservation = reservationService.GetReservation(id1)!;
-aliceReservation.CancellationPolicy = "Flexible";
+var policy = CancellationPolicyFactory.Create(CancellationPolicyType.Moderate);
+aliceReservation.CancellationPolicy = policy;
 cancellationService.CancelReservation(aliceReservation, new DateTime(2025, 6, 10));
 Console.WriteLine();
 
@@ -89,125 +95,130 @@ checkInService.ProcessCheckOut(bobReservation);
 Console.WriteLine($"[OK] {bobReservation.GuestName} checked out from Room {bobReservation.RoomId}");
 Console.WriteLine();
 
-//// ---------------------------------------------------------------
-//// Scenario 5: Billing (uses InvoiceGenerator — ISP violation)
-//// ---------------------------------------------------------------
-//Console.WriteLine("--- Scenario 5: Billing ---");
-//var invoiceGenerator = new InvoiceGenerator();
-//// Reset Bob's reservation for billing demo
-//var bobForBilling = new Reservation
-//{
-//    Id = id2,
-//    GuestName = "Bob Dupont",
-//    RoomId = "201",
-//    CheckIn = new DateTime(2025, 6, 15),
-//    CheckOut = new DateTime(2025, 6, 22),
-//    GuestCount = 2,
-//    RoomType = "Suite",
-//    Status = "CheckedOut"
-//};
-//var invoice = invoiceGenerator.Generate(bobForBilling);
-//invoiceGenerator.PrintInvoice(invoice, bobForBilling);
-//Console.WriteLine();
+// ---------------------------------------------------------------
+// Scenario 5: Billing (uses InvoiceGenerator — ISP violation)
+// ---------------------------------------------------------------
+Console.WriteLine("--- Scenario 5: Billing ---");
+var invoiceGenerator = new InvoiceGenerator();
+// Reset Bob's reservation for billing demo
+var bobForBilling = new Reservation
+{
+    Id = id2,
+    GuestName = "Bob Dupont",
+    RoomId = "201",
+    CheckIn = new DateTime(2025, 6, 15),
+    CheckOut = new DateTime(2025, 6, 22),
+    GuestCount = 2,
+    RoomType = "Suite",
+    Status = "CheckedOut"
+};
+var invoice = invoiceGenerator.Generate(bobForBilling);
+invoiceGenerator.PrintInvoice(invoice, bobForBilling);
+Console.WriteLine();
 
-//// ---------------------------------------------------------------
-//// Scenario 6: Housekeeping Schedule (uses Reservation.GetLinenChangeDays — SRP violation)
-//// ---------------------------------------------------------------
-//Console.WriteLine("--- Scenario 6: Housekeeping Schedule ---");
-//var bobForHousekeeping = new Reservation
-//{
-//    Id = id2,
-//    GuestName = "Bob Dupont",
-//    RoomId = "201",
-//    CheckIn = new DateTime(2025, 6, 15),
-//    CheckOut = new DateTime(2025, 6, 22),
-//    GuestCount = 2,
-//    RoomType = "Suite"
-//};
-//var bobLinenDays = bobForHousekeeping.GetLinenChangeDays();
-//Console.WriteLine($"Linen change schedule for Bob Dupont (Room 201, 15/06 -> 22/06):");
-//foreach (var day in bobLinenDays)
-//    Console.WriteLine($"  - {day:dd/MM/yyyy}");
+// ---------------------------------------------------------------
+// Scenario 6: Housekeeping Schedule (uses Reservation.GetLinenChangeDays — SRP violation)
+// ---------------------------------------------------------------
+Console.WriteLine("--- Scenario 6: Housekeeping Schedule ---");
+var HouseKeepingService = new HousekeepingService();
+var bobForHousekeeping = new Reservation
+{
+    Id = id2,
+    GuestName = "Bob Dupont",
+    RoomId = "201",
+    CheckIn = new DateTime(2025, 6, 15),
+    CheckOut = new DateTime(2025, 6, 22),
+    GuestCount = 2,
+    RoomType = "Suite"
+};
+var bobLinenDays = HouseKeepingService.GetLinenChangeDays(bobForHousekeeping);
+Console.WriteLine($"Linen change schedule for Bob Dupont (Room 201, 15/06 -> 22/06):");
+foreach (var day in bobLinenDays)
+    Console.WriteLine($"  - {day:dd/MM/yyyy}");
 
-//var durandForHousekeeping = new Reservation
-//{
-//    Id = id3,
-//    GuestName = "Famille Durand",
-//    RoomId = "301",
-//    CheckIn = new DateTime(2025, 6, 20),
-//    CheckOut = new DateTime(2025, 6, 25),
-//    GuestCount = 4,
-//    RoomType = "Family"
-//};
-//var durandLinenDays = durandForHousekeeping.GetLinenChangeDays();
-//Console.WriteLine($"Cleaning tasks for Famille Durand (Room 301, 20/06 -> 25/06):");
-//foreach (var day in durandLinenDays)
-//    Console.WriteLine($"  - {day:dd/MM/yyyy}");
-//Console.WriteLine();
+var durandForHousekeeping = new Reservation
+{
+    Id = id3,
+    GuestName = "Famille Durand",
+    RoomId = "301",
+    CheckIn = new DateTime(2025, 6, 20),
+    CheckOut = new DateTime(2025, 6, 25),
+    GuestCount = 4,
+    RoomType = "Family"
+};
+var durandLinenDays = HouseKeepingService.GetLinenChangeDays(durandForHousekeeping);
+Console.WriteLine($"Cleaning tasks for Famille Durand (Room 301, 20/06 -> 25/06):");
+foreach (var day in durandLinenDays)
+    Console.WriteLine($"  - {day:dd/MM/yyyy}");
+Console.WriteLine();
 
-//// ---------------------------------------------------------------
-//// Scenario 7: Event Dispatching (OCP good example — Observer pattern)
-//// ---------------------------------------------------------------
-//Console.WriteLine("--- Scenario 7: Event Dispatching ---");
-//var dispatcher = new ReservationEventDispatcher();
-//dispatcher.Register(new EmailConfirmationHandler());
-//dispatcher.Register(new HousekeepingSetupHandler());
-//dispatcher.Dispatch(new ReservationCreatedEvent
-//{
-//    ReservationId = "R-001",
-//    GuestName = "Alice Martin",
-//    RoomId = "101",
-//    Email = "alice.martin@email.com",
-//    CheckIn = new DateTime(2025, 6, 15),
-//    CheckOut = new DateTime(2025, 6, 18)
-//});
-//Console.WriteLine();
+// ---------------------------------------------------------------
+// Scenario 7: Event Dispatching (OCP good example — Observer pattern)
+// ---------------------------------------------------------------
+Console.WriteLine("--- Scenario 7: Event Dispatching ---");
+var dispatcher = new ReservationEventDispatcher();
+dispatcher.Register(new EmailConfirmationHandler());
+dispatcher.Register(new HousekeepingSetupHandler());
+dispatcher.Dispatch(new ReservationCreatedEvent
+{
+    ReservationId = "R-001",
+    GuestName = "Alice Martin",
+    RoomId = "101",
+    Email = "alice.martin@email.com",
+    CheckIn = new DateTime(2025, 6, 15),
+    CheckOut = new DateTime(2025, 6, 18)
+});
+Console.WriteLine();
 
-//// ---------------------------------------------------------------
-//// Scenario 8: Pricing with Seasonal Surcharge (OCP good example — Decorator)
-//// ---------------------------------------------------------------
-//Console.WriteLine("--- Scenario 8: Pricing with Seasonal Surcharge ---");
-//var aliceForPricing = new Reservation
-//{
-//    GuestName = "Alice Martin",
-//    RoomId = "101",
-//    CheckIn = new DateTime(2025, 6, 15),
-//    CheckOut = new DateTime(2025, 6, 18),
-//    RoomType = "Standard"
-//};
+// ---------------------------------------------------------------
+// Scenario 8: Pricing with Seasonal Surcharge (OCP good example — Decorator)
+// ---------------------------------------------------------------
+Console.WriteLine("--- Scenario 8: Pricing with Seasonal Surcharge ---");
+var aliceForPricing = new Reservation
+{
+    GuestName = "Alice Martin",
+    RoomId = "101",
+    CheckIn = new DateTime(2025, 6, 15),
+    CheckOut = new DateTime(2025, 6, 18),
+    RoomType = "Standard"
+};
 
-//IPriceCalculator baseCalculator = new BasePriceCalculator();
-//var basePrice = baseCalculator.Calculate(aliceForPricing);
-//Console.WriteLine($"Base price for Alice (3 nights Standard): {basePrice:F2} EUR");
+IPriceCalculator baseCalculator = new BasePriceCalculator();
+var basePrice = baseCalculator.Calculate(aliceForPricing);
+Console.WriteLine($"Base price for Alice (3 nights Standard): {basePrice:F2} EUR");
 
-//IPriceCalculator withSurcharge = new SeasonalSurchargeDecorator(baseCalculator, 0.20m);
-//var surchargedPrice = withSurcharge.Calculate(aliceForPricing);
-//Console.WriteLine($"With 20% summer surcharge: {surchargedPrice:F2} EUR");
-//Console.WriteLine();
+IPriceCalculator withSurcharge = new SeasonalSurchargeDecorator(baseCalculator, 0.20m);
+var surchargedPrice = withSurcharge.Calculate(aliceForPricing);
+Console.WriteLine($"With 20% summer surcharge: {surchargedPrice:F2} EUR");
+Console.WriteLine();
 
-//// ---------------------------------------------------------------
-//// Scenario 9: LSP Violation Demo
-//// ---------------------------------------------------------------
-//Console.WriteLine("--- Scenario 9: LSP Violation Demo ---");
-//ICancellable flexibleRes = new FlexibleReservation
-//{
-//    Id = "FLEX-001", GuestName = "Test Flexible", TotalPrice = 200m
-//};
-//flexibleRes.Cancel();
-//Console.WriteLine($"[OK] Flexible reservation cancelled, refund: {flexibleRes.CalculateRefund():F2} EUR");
+// ---------------------------------------------------------------
+// Scenario 9: LSP Violation Demo
+// ---------------------------------------------------------------
+Console.WriteLine("--- Scenario 9: LSP Violation Demo ---");
+ICancellable flexibleRes = new FlexibleReservation
+{
+    Id = "FLEX-001",
+    GuestName = "Test Flexible",
+    TotalPrice = 200m
+};
+flexibleRes.Cancel();
+Console.WriteLine($"[OK] Flexible reservation cancelled, refund: {flexibleRes.CalculateRefund():F2} EUR");
 
-//ICancellable nonRefundableRes = new NonRefundableReservation
-//{
-//    Id = "NR-001", GuestName = "Test NonRefundable", TotalPrice = 200m
-//};
-//try
-//{
-//    nonRefundableRes.Cancel(); // This will throw!
-//}
-//catch (InvalidOperationException ex)
-//{
-//    Console.WriteLine($"[ERROR] LSP violation: {ex.Message}");
-//}
-//Console.WriteLine();
+ICancellable nonRefundableRes = new NonRefundableReservation
+{
+    Id = "NR-001",
+    GuestName = "Test NonRefundable",
+    TotalPrice = 200m
+};
+try
+{
+    nonRefundableRes.Cancel(); // This will throw!
+}
+catch (InvalidOperationException ex)
+{
+    Console.WriteLine($"[ERROR] LSP violation: {ex.Message}");
+}
+Console.WriteLine();
 
 Console.WriteLine("=== End of Demo ===");

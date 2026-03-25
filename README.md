@@ -104,9 +104,9 @@ La classe `Reservation` sert **trois acteurs** differents :
 Le code contient deja des exemples **conformes** a OCP. Identifiez-les et expliquez
 pourquoi ils respectent OCP :
 
-- `Events/ReservationEventDispatcher.cs` — quel pattern ?
-- `Interfaces/IPriceCalculator.cs` + `SeasonalSurchargeDecorator.cs` — quel pattern ?
-- `Interfaces/ICleaningPolicy.cs` + implementations — quel pattern ?
+- `Events/ReservationEventDispatcher.cs` — quel pattern ? Observer
+- `Interfaces/IPriceCalculator.cs` + `SeasonalSurchargeDecorator.cs` — quel pattern ? Decorator
+- `Interfaces/ICleaningPolicy.cs` + implementations — quel pattern ? Le strategy pattern et permet de créer de nouvelle strategie de nettoyage
 
 #### 2.2 Corriger l'exemple mal fait
 

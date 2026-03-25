@@ -1,4 +1,4 @@
-namespace HotelReservation.Application.Services;
+namespace HotelReservation.Application.Services.Reservation;
 
 using HotelReservation.Infrastructure;
 using HotelReservation.Domain.Models;

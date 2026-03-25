@@ -1,17 +1,18 @@
 namespace HotelReservation.Infrastructure.Repositories;
 
 using HotelReservation.Application.Interfaces;
+using HotelReservation.Application.Services;
 using HotelReservation.Domain.Models;
 using HotelReservation.Infrastructure.Interfaces;
 
 public class InMemoryReservationRepository: IReservationRepository
 {
-    private readonly IPriceCalculator _priceCalculator;
+    private readonly IReservationAccounting _accounting;
     private readonly Dictionary<string, Reservation> _reservations = new();
 
-    public InMemoryReservationRepository(IPriceCalculator priceCalculator)
+    public InMemoryReservationRepository(IReservationAccounting accounting)
     {
-        _priceCalculator = priceCalculator; 
+        _accounting = accounting; 
     }
 
     public Reservation? GetById(string id)
@@ -57,7 +58,7 @@ public class InMemoryReservationRepository: IReservationRepository
     {
         return _reservations.Values
             .Where(r => r.CheckIn >= from && r.CheckOut <= to && r.Status != "Cancelled")
-            .Sum(r => _priceCalculator.Calculate(r));
+            .Sum(r => _accounting.Calculate(r));
     }
 
     public Dictionary<string, int> GetOccupancyStats(DateTime from, DateTime to)

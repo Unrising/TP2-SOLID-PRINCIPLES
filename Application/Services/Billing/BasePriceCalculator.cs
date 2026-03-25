@@ -1,6 +1,6 @@
 using HotelReservation.Application.Interfaces;
 
-namespace HotelReservation.Application.Services;
+namespace HotelReservation.Application.Services.Billing;
 
 using HotelReservation.Domain.Models;
 

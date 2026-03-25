@@ -1,4 +1,4 @@
-namespace HotelReservation.Application.Services;
+namespace HotelReservation.Application.Services.CleaningPolicy;
 
 using HotelReservation.Domain.Models;
 using HotelReservation.Infrastructure.Services;
@@ -9,8 +9,6 @@ public class HousekeepingService
 {
     // Direct dependency on concrete EmailSender
     private readonly EmailSender _emailSender = new();
-
-
 
     public List<CleaningTask> GenerateLinenChangeSchedule(Reservation reservation)
     {
