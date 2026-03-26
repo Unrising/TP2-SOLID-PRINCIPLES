@@ -1,11 +1,8 @@
-namespace HotelReservation.Infrastructure.Repositories;
+using HotelReservation.Application;
+using HotelReservation.Domain;
 
-using HotelReservation.Application.Interfaces;
-using HotelReservation.Application.Services;
-using HotelReservation.Domain.Models;
-using HotelReservation.Infrastructure.Interfaces;
-
-public class InMemoryReservationRepository: IReservationRepository
+namespace HotelReservation.Infrastructure;
+public class InMemoryReservationRepository: IReservationRepository, IReservationBilling
 {
     private readonly IReservationAccounting _accounting;
     private readonly Dictionary<string, Reservation> _reservations = new();

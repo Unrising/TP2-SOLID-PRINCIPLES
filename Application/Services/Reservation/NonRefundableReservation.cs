@@ -1,19 +1,14 @@
+using HotelReservation.Application;
+
 namespace HotelReservation.Application;
-public class FlexibleReservation : ICancellable
+public class NonRefundableReservation : IReservation
 {
     public string Id { get; set; } = string.Empty;
     public string GuestName { get; set; } = string.Empty;
     public string Status { get; set; } = "Confirmed";
     public decimal TotalPrice { get; set; }
-
-    public void Cancel()
-    {
-        if (Status == "CheckedIn")
-            throw new InvalidOperationException("Cannot cancel after check-in");
-        Status = "Cancelled";
-    }
     public decimal CalculateRefund()
     {
-        return TotalPrice; 
+        return 0m;
     }
 }

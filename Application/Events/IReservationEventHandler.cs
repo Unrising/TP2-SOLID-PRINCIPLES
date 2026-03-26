@@ -1,7 +1,7 @@
-namespace HotelReservation.Application.Events;
+using HotelReservation.Domain;
 
-// OCP GOOD EXAMPLE (Observer pattern): New handlers can be registered
-// without modifying the dispatcher or existing handlers.
+namespace HotelReservation.Application;
+
 public interface IReservationEventHandler
 {
     void Handle(ReservationCreatedEvent evt);

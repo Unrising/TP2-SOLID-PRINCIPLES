@@ -1,7 +1,4 @@
-using System.Net.NetworkInformation;
-
-namespace HotelReservation.Domain.Models;
-
+namespace HotelReservation.Domain;
 public class Room
 {
     public string Id { get; set; } = string.Empty;

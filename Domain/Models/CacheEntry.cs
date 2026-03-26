@@ -1,5 +1,4 @@
-namespace HotelReservation.Domain.Models;
-
+namespace HotelReservation.Domain;
 public class CacheEntry
 {
     public DateTime Timestamp { get; set; }

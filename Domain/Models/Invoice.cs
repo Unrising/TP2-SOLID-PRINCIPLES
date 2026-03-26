@@ -1,5 +1,4 @@
-namespace HotelReservation.Domain.Models;
-
+namespace HotelReservation.Domain;
 public class Invoice
 {
     public string ReservationId { get; set; } = string.Empty;

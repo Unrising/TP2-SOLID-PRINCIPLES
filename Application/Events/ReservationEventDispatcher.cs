@@ -1,7 +1,7 @@
-namespace HotelReservation.Application.Events;
+using HotelReservation.Domain;
 
-// OCP GOOD EXAMPLE: Adding a new handler (e.g., audit, analytics) requires
-// only registering it. The dispatcher code never changes.
+namespace HotelReservation.Application;
+
 public class ReservationEventDispatcher
 {
     private readonly List<IReservationEventHandler> _handlers = new();

@@ -1,7 +1,6 @@
-using HotelReservation.Application.Services.Reservation;
+using HotelReservation.Application;
 
-namespace HotelReservation.Domain.Models;
-
+namespace HotelReservation.Domain;
 public class Reservation
 {
     public string Id { get; set; } = string.Empty;

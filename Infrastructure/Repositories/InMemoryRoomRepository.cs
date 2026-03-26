@@ -1,8 +1,7 @@
-namespace HotelReservation.Infrastructure.Repositories;
+using HotelReservation.Application;
+using HotelReservation.Domain;
 
-using HotelReservation.Domain.Models;
-using HotelReservation.Infrastructure.Interfaces;
-
+namespace HotelReservation.Infrastructure;
 public class InMemoryRoomRepository : IRoomRepository
 {
     private readonly Dictionary<string, Room> _rooms = new();

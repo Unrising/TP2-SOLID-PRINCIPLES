@@ -1,10 +1,9 @@
-namespace HotelReservation.Domain.Models;
-
+namespace HotelReservation.Domain;
 public class CleaningTask
 {
     public string RoomId { get; set; } = string.Empty;
     public DateTime Date { get; set; }
-    public string Type { get; set; } = string.Empty; // "LinenChange", "FullCleaning", "InitialSetup"
+    public string Type { get; set; } = string.Empty;
     public string HousekeeperEmail { get; set; } = string.Empty;
     public TimeSpan Time { get; set; }
 }

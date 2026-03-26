@@ -1,16 +1,8 @@
-using HotelReservation.Application.Interfaces;
-using HotelReservation.Application.Events;
-using HotelReservation.Infrastructure.Repositories;
-using HotelReservation.Domain.Models;
-using HotelReservation.Infrastructure.Interfaces;
 using HotelReservation.Infrastructure;
-using HotelReservation.Infrastructure.Services;
-using HotelReservation.Application.Services.CancellationPolicy;
-using HotelReservation.Application.Services.Reservation;
 using HotelReservation.Application;
-using HotelReservation.Application.Services.Checkin;
-using HotelReservation.Application.Services.Billing;
-using HotelReservation.Application.Services.CleaningPolicy;
+using HotelReservation.Domain;
+using HotelReservation;
+using HotelReservation.Application.Interfaces.Reservation;
 
 Console.WriteLine("=== Le Mas des Oliviers - Hotel Management System ===");
 Console.WriteLine();
@@ -57,6 +49,7 @@ Console.WriteLine();
 // ---------------------------------------------------------------
 // Scenario 2: Double Booking Attempt
 // ---------------------------------------------------------------
+
 Console.WriteLine("--- Scenario 2: Double Booking Attempt ---");
 try
 {
@@ -73,6 +66,7 @@ Console.WriteLine();
 // ---------------------------------------------------------------
 // Scenario 3: Cancellation (uses CancellationService — OCP violation)
 // ---------------------------------------------------------------
+
 Console.WriteLine("--- Scenario 3: Cancellation ---");
 ICancellable flexibleReservation = new FlexibleReservation();
 var cancellationService = new CancellationService(flexibleReservation);
@@ -85,6 +79,7 @@ Console.WriteLine();
 // ---------------------------------------------------------------
 // Scenario 4: Check-In / Check-Out (uses CheckInService — SRP violation)
 // ---------------------------------------------------------------
+
 Console.WriteLine("--- Scenario 4: Check-In / Check-Out ---");
 var bobReservation = reservationService.GetReservation(id2)!;
 var checkInService = new CheckInService(reservationRepo);
@@ -98,6 +93,7 @@ Console.WriteLine();
 // ---------------------------------------------------------------
 // Scenario 5: Billing (uses InvoiceGenerator — ISP violation)
 // ---------------------------------------------------------------
+
 Console.WriteLine("--- Scenario 5: Billing ---");
 var invoiceGenerator = new InvoiceGenerator();
 // Reset Bob's reservation for billing demo
@@ -112,15 +108,32 @@ var bobForBilling = new Reservation
     RoomType = "Suite",
     Status = "CheckedOut"
 };
-var invoice = invoiceGenerator.Generate(bobForBilling);
+
+// Faire un mapper
+var invoiceForBobBilling = new InvoiceReservationInfo
+{
+    Id = bobForBilling.Id,
+    GuestName = bobForBilling.GuestName,
+    CheckIn = bobForBilling.CheckIn,
+    CheckOut = bobForBilling.CheckOut,
+    GuestCount = bobForBilling.GuestCount,
+    RoomType = bobForBilling.RoomType,
+    RoomId = bobForBilling.RoomId,
+};
+
+var invoice = invoiceGenerator.Generate(invoiceForBobBilling);
+
 invoiceGenerator.PrintInvoice(invoice, bobForBilling);
 Console.WriteLine();
 
 // ---------------------------------------------------------------
 // Scenario 6: Housekeeping Schedule (uses Reservation.GetLinenChangeDays — SRP violation)
 // ---------------------------------------------------------------
+
 Console.WriteLine("--- Scenario 6: Housekeeping Schedule ---");
-var HouseKeepingService = new HousekeepingService();
+
+INotificationServiceEmail notification = new NotificationServiceEmail();
+var HouseKeepingService = new HousekeepingService(notification);
 var bobForHousekeeping = new Reservation
 {
     Id = id2,
@@ -195,6 +208,7 @@ Console.WriteLine();
 // ---------------------------------------------------------------
 // Scenario 9: LSP Violation Demo
 // ---------------------------------------------------------------
+
 Console.WriteLine("--- Scenario 9: LSP Violation Demo ---");
 ICancellable flexibleRes = new FlexibleReservation
 {
@@ -205,20 +219,20 @@ ICancellable flexibleRes = new FlexibleReservation
 flexibleRes.Cancel();
 Console.WriteLine($"[OK] Flexible reservation cancelled, refund: {flexibleRes.CalculateRefund():F2} EUR");
 
-ICancellable nonRefundableRes = new NonRefundableReservation
-{
-    Id = "NR-001",
-    GuestName = "Test NonRefundable",
-    TotalPrice = 200m
-};
-try
-{
-    nonRefundableRes.Cancel(); // This will throw!
-}
-catch (InvalidOperationException ex)
-{
-    Console.WriteLine($"[ERROR] LSP violation: {ex.Message}");
-}
+//IReservation nonRefundableRes = new NonRefundableReservation
+//{
+//    Id = "NR-001",
+//    GuestName = "Test NonRefundable",
+//    TotalPrice = 200m
+//};
+//try
+//{
+//    nonRefundableRes.Cancel(); // This will throw!
+//}
+//catch (InvalidOperationException ex)
+//{
+//    Console.WriteLine($"[ERROR] LSP violation: {ex.Message}");
+//}
 Console.WriteLine();
 
 Console.WriteLine("=== End of Demo ===");

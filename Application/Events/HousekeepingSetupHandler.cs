@@ -1,5 +1,6 @@
-namespace HotelReservation.Application.Events;
+using HotelReservation.Domain;
 
+namespace HotelReservation.Application;
 public class HousekeepingSetupHandler : IReservationEventHandler
 {
     public void Handle(ReservationCreatedEvent evt)

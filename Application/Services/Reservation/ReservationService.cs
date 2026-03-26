@@ -1,9 +1,7 @@
-namespace HotelReservation.Application.Services.Reservation;
-
 using HotelReservation.Infrastructure;
-using HotelReservation.Domain.Models;
-using HotelReservation.Infrastructure.Interfaces;
+using HotelReservation.Domain;
 
+namespace HotelReservation.Application;
 public class ReservationService
 {
     private readonly ILogger _logger;
