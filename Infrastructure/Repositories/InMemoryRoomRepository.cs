@@ -1,4 +1,5 @@
 using HotelReservation.Application;
+using HotelReservation.Application.Interfaces.Reservation;
 using HotelReservation.Domain;
 
 namespace HotelReservation.Infrastructure;

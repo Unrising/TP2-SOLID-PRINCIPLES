@@ -1,4 +1,4 @@
-namespace HotelReservation.Application;
+namespace HotelReservation.Application.Services.Accounting;
 public class BillingService 
 {
     private readonly IReservationBilling _billing;

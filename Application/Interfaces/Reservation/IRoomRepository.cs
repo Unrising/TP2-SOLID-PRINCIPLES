@@ -1,4 +1,4 @@
-namespace HotelReservation.Infrastructure;
+namespace HotelReservation.Application.Interfaces.Reservation;
 
 using HotelReservation.Domain;
 public interface IRoomRepository

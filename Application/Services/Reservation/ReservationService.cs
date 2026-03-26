@@ -1,5 +1,6 @@
 using HotelReservation.Infrastructure;
 using HotelReservation.Domain;
+using HotelReservation.Application.Interfaces.Reservation;
 
 namespace HotelReservation.Application;
 public class ReservationService

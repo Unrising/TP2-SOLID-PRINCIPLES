@@ -1,6 +1,6 @@
 using HotelReservation.Domain;
 
-namespace HotelReservation.Application;
+namespace HotelReservation.Application.Services.Accounting;
 public class SeasonalSurchargeDecorator : IPriceCalculator
 {
     private readonly IPriceCalculator _inner;
